@@ -3,5 +3,11 @@
         <file>main.qml</file>
         <file>img/title.png</file>
         <file>audio/theme.mp3</file>
+        <file>Game.qml</file>
+        <file>Intro.qml</file>
+        <file>img/cat.png</file>
+        <file>img/bus.png</file>
+        <file>img/dog.png</file>
+        <file>img/train.png</file>
     </qresource>
 </RCC>

@@ -5,7 +5,7 @@
 
 #include <thread>
 #include "DeepSpeechC.h"
-#include "game.h"
+#include "Game.h"
 
 //Convenience function to debug file path issues
 void listFiles(QString dir)
@@ -84,14 +84,14 @@ DeepSpeech::~DeepSpeech()
 
 void DeepSpeech::startRecording()
 {
-
-
+    std::lock_guard<std::mutex> guard(lock);
     int ret = DS_CreateStream(model, &state);
     qInfo()<<"Setting up Model Stream : "<<ret;
 }
 
 void DeepSpeech::stopRecording()
 {
+    std::lock_guard<std::mutex> guard(lock);
     qInfo()<<"Clearing Hotwords and Freeing stream"<<this->thread();
     DS_ClearHotWords(model);
     if(state)
@@ -103,7 +103,8 @@ void DeepSpeech::stopRecording()
 
 void DeepSpeech::setHotword(QString hotword)
 {
-//   DS_AddHotWord(model, hotword.toStdString().c_str(), 100.0f );
+    std::string word = hotword.toStdString();
+   DS_AddHotWord(model, word.c_str(), 5.0f );
 }
 
 void DeepSpeech::clearHotwords()
@@ -114,26 +115,32 @@ void DeepSpeech::clearHotwords()
 
 void DeepSpeech::transcribeAudio()
 {
-    if(state)
-    {
-        QIODevice* device = static_cast<QIODevice*>(sender());
-        QByteArray data = device->readAll();
-        DS_FeedAudioContent(state, reinterpret_cast<const short*>(data.data()), data.size()/2);
-      //  qInfo()<<"Transcribed "<<data.size()<<" bytes...";
-        qInfo()<<"Transcribing on thread "<<this->thread();
-        samplesCollected += data.size()/2;
-
-        if(samplesCollected > 16000)
+    try {
+        std::lock_guard<std::mutex> guard(lock);
+        if(state)
         {
-            std::string qtext;
-            char* text = DS_IntermediateDecode(state);
-            qInfo()<<text;
-            qtext = text;
-            DS_FreeString(text);
+            QIODevice* device = static_cast<QIODevice*>(sender());
+            QByteArray data = device->readAll();
+            qInfo()<<"Received audio bytes "<<data.size();
+            DS_FeedAudioContent(state, reinterpret_cast<const short*>(data.data()), data.size()/2);
+            //  qInfo()<<"Transcribed "<<data.size()<<" bytes...";
+            qInfo()<<"Transcribing on thread "<<this->thread();
+            samplesCollected += data.size()/2;
 
-            //Inform Game of new speech by user
-            emit transcript(QString::fromStdString(qtext));
-            samplesCollected = 0;
+            if(samplesCollected > 16000)
+            {
+                std::string qtext;
+                char* text = DS_IntermediateDecode(state);
+                qInfo()<<text;
+                qtext = text;
+                DS_FreeString(text);
+
+                //Inform Game of new speech by user
+                emit transcript(QString::fromStdString(qtext));
+                samplesCollected = 0;
+            }
         }
+    }  catch (std::exception& e) {
+        qInfo()<<e.what();
     }
 }

@@ -31,6 +31,8 @@ private:
     StreamingState* state = nullptr;
     int samplesCollected = 0;
     void doTranscription(QIODevice* device);
+
+    std::mutex lock;
 };
 
 

@@ -2,7 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QFileInfo>
 
-#include "game.h"
+#include "Game.h"
 
 
 int main(int argc, char *argv[])

@@ -8,7 +8,7 @@ CONFIG += c++11
 
 SOURCES += \
         DeepSpeechC.cpp \
-        game.cpp \
+        Game.cpp \
         main.cpp
 
 RESOURCES += qml.qrc
@@ -49,7 +49,7 @@ ANDROID_EXTRA_LIBS = $$PWD/lib/arm7/libc++_shared.so $$PWD/lib/arm7/libdeepspeec
 
 HEADERS += \
     DeepSpeechC.h \
-    game.h
+    Game.h
 
 DISTFILES += \
     android/AndroidManifest.xml \

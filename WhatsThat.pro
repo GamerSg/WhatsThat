@@ -1,4 +1,4 @@
-QT += quick multimedia
+QT += quick multimedia texttospeech
 
 CONFIG += c++11
 

@@ -6,13 +6,15 @@
 #include <QMediaPlayer>
 #include <QThread>
 #include <string>
+#include <QTextToSpeech>
 
 #include "DeepSpeechC.h"
 
 enum GameState
 {
     INTRO,
-    GAME
+    GAME,
+    QUIT
 };
 
 struct Question
@@ -33,6 +35,8 @@ public slots:
     void openingMenu();
     void userSpeech(QString text);
     void listenFor(QString word);
+    void speak(QString text);
+    void speechDone(QTextToSpeech::State state);
 
 signals:    
     void gameStart();
@@ -42,7 +46,8 @@ private:
     static Game* backend;
     QMediaPlayer* player=nullptr;
     void loadMusic(QString file);
-    void nextQsn();
+    void nextQsn(bool sayit=false);
+    void showNextQsn();
 
     DeepSpeech ds;
     QThread deepThread;  //Run DeepSpeech in diff thread to prevent UI Lag
@@ -50,6 +55,8 @@ private:
     GameState gameState = INTRO;
 
     std::vector<Question> qsns;
+
+    QTextToSpeech* speech;
 
 };
 

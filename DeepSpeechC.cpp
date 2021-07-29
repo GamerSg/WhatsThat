@@ -84,14 +84,23 @@ DeepSpeech::~DeepSpeech()
 
 void DeepSpeech::startRecording()
 {
+    qInfo()<<"Recording";
     std::lock_guard<std::mutex> guard(lock);
+    if(recorder->state() == QAudio::State::SuspendedState)
+    {
+        recorder->resume();
+    }
+    qInfo()<<"Recorder state now is "<<recorder->state();
     int ret = DS_CreateStream(model, &state);
     qInfo()<<"Setting up Model Stream : "<<ret;
 }
 
 void DeepSpeech::stopRecording()
 {
+    qInfo()<<"Stopping Recording";
     std::lock_guard<std::mutex> guard(lock);
+    //recorder->suspend();
+    qInfo()<<"Recorder state now is "<<recorder->state();
     qInfo()<<"Clearing Hotwords and Freeing stream"<<this->thread();
     DS_ClearHotWords(model);
     if(state)
@@ -107,24 +116,24 @@ void DeepSpeech::setHotword(QString hotword)
    DS_AddHotWord(model, word.c_str(), 5.0f );
 }
 
-void DeepSpeech::clearHotwords()
-{
- //   DS_ClearHotWords(model);
-}
-
-
 void DeepSpeech::transcribeAudio()
 {
     try {
+        //qInfo()<<"Buffer size "<<recorder->bufferSize();
         std::lock_guard<std::mutex> guard(lock);
+        qInfo()<<"Bytes ready"<<recorder->bytesReady();
+        QIODevice* device = static_cast<QIODevice*>(sender());
         if(state)
         {
-            QIODevice* device = static_cast<QIODevice*>(sender());
             QByteArray data = device->readAll();
             qInfo()<<"Received audio bytes "<<data.size();
+            if(data.size() > 50000)
+            {//Optimisation for phones or slow hardware, skip these bytes to prevent snowballing buffer size
+                return;
+            }
             DS_FeedAudioContent(state, reinterpret_cast<const short*>(data.data()), data.size()/2);
-            //  qInfo()<<"Transcribed "<<data.size()<<" bytes...";
-            qInfo()<<"Transcribing on thread "<<this->thread();
+        //  qInfo()<<"Transcribed "<<data.size()<<" bytes...";
+   //       qInfo()<<"Transcribing on thread "<<this->thread();
             samplesCollected += data.size()/2;
 
             if(samplesCollected > 16000)
@@ -140,6 +149,7 @@ void DeepSpeech::transcribeAudio()
                 samplesCollected = 0;
             }
         }
+
     }  catch (std::exception& e) {
         qInfo()<<e.what();
     }

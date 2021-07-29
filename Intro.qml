@@ -33,7 +33,7 @@ Page {
         ]
 
         Component.onCompleted: {
-            Game.listenFor("start");
+            //Game.listenFor("start");
         }
 
         ColumnLayout {
@@ -113,10 +113,20 @@ Page {
             endFrame: 230
             enabled: true
             startFrame: 0
+            property bool playedIntro: false
+            property bool playedPrompt: false
             onCurrentFrameChanged: {
-                if (currentFrame == 100)
+                var frame = Math.floor(currentFrame);
+                //console.log(frame);
+                if (frame == 100 && playedIntro==false)
                 {
                     Game.openingMenu();
+                    playedIntro = true;
+                }
+                else if(frame == 199 && playedPrompt==false)
+                {
+                    Game.speak("Say start to begin!");
+                    playedPrompt = true;
                 }
             }
 

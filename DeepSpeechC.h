@@ -20,7 +20,6 @@ public slots:
     void init();
     void transcribeAudio();
     void setHotword(QString hotword);
-    void clearHotwords();
     void stopRecording();
     void startRecording();
 signals:
@@ -31,8 +30,11 @@ private:
     StreamingState* state = nullptr;
     int samplesCollected = 0;
     void doTranscription(QIODevice* device);
+    void createRecorder();
 
     std::mutex lock;
+    bool recording = false;
+    int idealSample = 0;
 };
 
 

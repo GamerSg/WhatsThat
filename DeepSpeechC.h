@@ -29,8 +29,7 @@ private:
     ModelState* model = nullptr;
     StreamingState* state = nullptr;
     int samplesCollected = 0;
-    void doTranscription(QIODevice* device);
-    void createRecorder();
+    void doTranscription(QIODevice* device);    
 
     std::mutex lock;
     bool recording = false;

@@ -31,9 +31,7 @@ private:
     int samplesCollected = 0;
     void doTranscription(QIODevice* device);    
 
-    std::mutex lock;
-    bool recording = false;
-    int idealSample = 0;
+    std::mutex lock;    
 };
 
 

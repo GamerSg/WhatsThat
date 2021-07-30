@@ -15,6 +15,20 @@ Page {
             id: columnLayout
             anchors.fill: parent
 
+            Text {
+                id: scoreTxt
+                color: "#ffffff"
+                text: "Score  0"
+                font.pixelSize: 35
+                Layout.topMargin: 20
+                font.bold: true
+                font.family: "Courier"
+                Layout.rightMargin: 20
+                textFormat: Text.RichText
+                Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                property int score: 0;
+            }
+
             Rectangle {
                 id: rectangle
                 width: 200
@@ -28,7 +42,8 @@ Page {
                 width: 100
                 height: 100
                 source: "qrc:/qtquickplugin/images/template_image.png"
-                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.fillWidth: false
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                 fillMode: Image.PreserveAspectFit
             }
@@ -48,12 +63,16 @@ Page {
                 color: "#00ffffff"
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
             }
+
             Connections{
                 target: Game
                 onShowQsn:{
                     qsnImg.source = img;
+                    scoreTxt.score += 1;
+                    scoreTxt.text = "Score "+scoreTxt.score;
                 }
-             }
+            }
+
 
         }
 
@@ -99,6 +118,6 @@ Page {
 
 /*##^##
 Designer {
-    D{i:0;autoSize:true;height:800;width:600}D{i:2}D{i:8}
+    D{i:0;autoSize:true;height:800;width:600}D{i:9}
 }
 ##^##*/

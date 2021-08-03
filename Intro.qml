@@ -33,7 +33,7 @@ Page {
         ]
 
         Component.onCompleted: {
-            //Game.listenFor("start");
+
         }
 
         ColumnLayout {

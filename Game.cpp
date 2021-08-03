@@ -18,17 +18,19 @@ Game::Game(QObject *parent) : QObject(parent)
    speech = new QTextToSpeech(this);
 
    qInfo()<<"Game created on thread "<<this->thread();
-   ds.moveToThread(&deepThread);
-   deepThread.start();
-   ds.init();
-   //Subscribe to all transcribed text
-   connect(&ds,&DeepSpeech::transcript, this, &Game::userSpeech);
-   connect(speech,&QTextToSpeech::stateChanged, this, &Game::speechDone);
+   ds.moveToThread(&deepThread);    //Run recording and transcription on another thread to prevent UI Lag
+   deepThread.start();              //Start the thread
+   ds.init();                       //Init audio recording and deepspeech stream
+
+   connect(&ds,&DeepSpeech::transcript, this, &Game::userSpeech);  //Subscribe to all transcribed text, callback to Game::userSpeech
+
+   connect(speech,&QTextToSpeech::stateChanged, this, &Game::speechDone);  //Subscribe to all spoken text, callback to Game::speechDone
    //Create questions
    qsns.push_back( {"cat", "qrc:/img/cat.png"});
    qsns.push_back( {"bus", "qrc:/img/bus.png"});
    qsns.push_back( {"dog", "qrc:/img/dog.png"});
    qsns.push_back( {"train", "qrc:/img/train.png"});
+   qsns.push_back( {"sun", "qrc:/img/sun.png"});
 
    //Random seed
    srand(time(0));
@@ -53,20 +55,11 @@ void Game::listenFor(QString word)
     listeningFor = word;  
     ds.startRecording();
     ds.setHotword("quit");
-    ds.setHotword(word);
+    ds.setHotword(word);    
 }
 
 void Game::loadMusic(QString file)
 {
-//#ifdef Q_OS_ANDROID
-//    QFileInfo f("assets:/"+file);
-//    qInfo()<<"Loading "<<f.absoluteFilePath();
-//    player->setMedia(QUrl::fromLocalFile(f.absoluteFilePath()));
-//    qInfo()<<"Media Status "<<player->mediaStatus();
-//#else
-//    QFileInfo f("./"+file);
-//    player->setMedia(QUrl::fromLocalFile(f.absoluteFilePath()));
-//#endif
     player->setMedia(QUrl("qrc:/"+file));
 }
 
@@ -113,7 +106,12 @@ void Game::nextQsn(bool sayit)
 
 void Game::showNextQsn()
 {
-    int qsnNum =rand() % qsns.size();
+    int qsnNum = 0;
+
+    do
+    {   //Keep looping to make sure it is a different question
+        qsnNum =rand() % qsns.size();
+    }while(qsns[qsnNum].name == listeningFor);
     listenFor(qsns[qsnNum].name);
     emit showQsn(qsns[qsnNum].name, qsns[qsnNum].img);
 }

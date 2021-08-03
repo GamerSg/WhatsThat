@@ -9,5 +9,6 @@
         <file>img/bus.png</file>
         <file>img/dog.png</file>
         <file>img/train.png</file>
+        <file>img/sun.png</file>
     </qresource>
 </RCC>
